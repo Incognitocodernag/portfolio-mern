@@ -13,11 +13,15 @@ import {
   Plus, 
   Loader2, 
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  LayoutDashboard,
+  Clock,
+  TrendingUp,
+  Inbox
 } from 'lucide-react';
 
 function Dashboard() {
-  const [activeTab, setActiveTab] = useState('messages');
+  const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [messageList, setMessageList] = useState([]);
   const [projectList, setProjectList] = useState([]);
@@ -35,7 +39,7 @@ function Dashboard() {
 
   useEffect(() => {
     fetchData();
-  }, [activeTab]);
+  }, []);
 
   const showAlert = (type, text) => {
     setAlert({ type, text });
@@ -51,16 +55,14 @@ function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      if (activeTab === 'messages') {
-        const res = await API.get('/api/messages');
-        setMessageList(res.data);
-      } else if (activeTab === 'projects') {
-        const res = await API.get('/api/portfolio/projects');
-        setProjectList(res.data);
-      } else if (activeTab === 'timeline') {
-        const res = await API.get('/api/portfolio/timeline');
-        setTimelineList(res.data);
-      }
+      const [msgRes, projRes, timeRes] = await Promise.all([
+        API.get('/api/messages'),
+        API.get('/api/portfolio/projects'),
+        API.get('/api/portfolio/timeline')
+      ]);
+      setMessageList(msgRes.data);
+      setProjectList(projRes.data);
+      setTimelineList(timeRes.data);
     } catch (err) {
       if (err.response?.status === 401) {
         handleLogout();
@@ -210,6 +212,19 @@ function Dashboard() {
         {/* Left Sidebar Tabs */}
         <aside className="flex flex-col gap-2">
           <button 
+            onClick={() => setActiveTab('overview')}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold transition-all ${
+              activeTab === 'overview' ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <LayoutDashboard className="w-5 h-5" />
+              <span>Overview</span>
+            </div>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+
+          <button 
             onClick={() => setActiveTab('messages')}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold transition-all ${
               activeTab === 'messages' ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
@@ -264,6 +279,211 @@ function Dashboard() {
             <div className="flex items-center justify-center py-12 gap-3 text-orange-500">
               <Loader2 className="w-6 h-6 animate-spin" />
               <span>Loading workspace info...</span>
+            </div>
+          )}
+
+          {/* Overview Dashboard Tab */}
+          {!loading && activeTab === 'overview' && (
+            <div className="flex flex-col gap-10">
+              
+              {/* Header Title */}
+              <div className="flex flex-col gap-1">
+                <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Workspace Overview</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">At-a-glance metrics and activity logs for your portfolio.</p>
+              </div>
+
+              {/* Stats Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                {/* Total Messages */}
+                <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Inbox Submissions</span>
+                    <span className="text-3xl font-extrabold text-slate-900 dark:text-white">{messageList.length}</span>
+                  </div>
+                  <div className="p-3 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-xl">
+                    <Inbox className="w-6 h-6" />
+                  </div>
+                </div>
+
+                {/* Messages Today */}
+                <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Received Today</span>
+                    <span className="text-3xl font-extrabold text-slate-900 dark:text-white">
+                      {messageList.filter(msg => new Date(msg.createdAt).toDateString() === new Date().toDateString()).length}
+                    </span>
+                  </div>
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                </div>
+
+                {/* Projects Showcase */}
+                <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Showcased Works</span>
+                    <span className="text-3xl font-extrabold text-slate-900 dark:text-white">{projectList.length}</span>
+                  </div>
+                  <div className="p-3 bg-sky-500/10 border border-sky-500/20 text-sky-500 rounded-xl">
+                    <Briefcase className="w-6 h-6" />
+                  </div>
+                </div>
+
+                {/* Growth Milestones */}
+                <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Timeline Cards</span>
+                    <span className="text-3xl font-extrabold text-slate-900 dark:text-white">{timelineList.length}</span>
+                  </div>
+                  <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 rounded-xl">
+                    <Calendar className="w-6 h-6" />
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Chart & Quick Activity Container */}
+              <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-8">
+                
+                {/* Custom SVG Message Chart Card */}
+                <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 shadow-sm">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="flex flex-col gap-1">
+                      <h3 className="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-orange-500" />
+                        <span>Inquiry Frequency</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Total form submissions over the last 7 days.</p>
+                    </div>
+                  </div>
+                  
+                  {/* SVG Bar Chart */}
+                  <div className="relative py-4 pr-2 pl-4 border border-slate-100 dark:border-white/5 rounded-xl bg-slate-50/50 dark:bg-[#02050E]/40 overflow-hidden">
+                    {(() => {
+                      const getChartData = () => {
+                        const data = [];
+                        const today = new Date();
+                        for (let i = 6; i >= 0; i--) {
+                          const date = new Date(today);
+                          date.setDate(today.getDate() - i);
+                          const dateStr = date.toDateString();
+                          const count = messageList.filter(msg => new Date(msg.createdAt).toDateString() === dateStr).length;
+                          const label = date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+                          data.push({ label, count });
+                        }
+                        return data;
+                      };
+                      const chartData = getChartData();
+                      const maxCount = Math.max(...chartData.map(d => d.count), 1);
+                      
+                      return (
+                        <svg viewBox="0 0 500 200" className="w-full h-48 sm:h-60 text-slate-300 dark:text-white/5">
+                          {/* Horizontal Grid lines */}
+                          <line x1="40" y1="20" x2="480" y2="20" stroke="currentColor" strokeOpacity="0.08" strokeDasharray="3 3" />
+                          <line x1="40" y1="70" x2="480" y2="70" stroke="currentColor" strokeOpacity="0.08" strokeDasharray="3 3" />
+                          <line x1="40" y1="120" x2="480" y2="120" stroke="currentColor" strokeOpacity="0.08" strokeDasharray="3 3" />
+                          <line x1="40" y1="170" x2="480" y2="170" stroke="currentColor" strokeOpacity="0.2" />
+                          
+                          {/* Y-Axis labels */}
+                          <text x="30" y="24" textAnchor="end" className="text-[9px] fill-slate-400 font-semibold">{maxCount}</text>
+                          <text x="30" y="98" textAnchor="end" className="text-[9px] fill-slate-400 font-semibold">{Math.round(maxCount / 2)}</text>
+                          <text x="30" y="174" textAnchor="end" className="text-[9px] fill-slate-400 font-semibold">0</text>
+                          
+                          {chartData.map((d, idx) => {
+                            const barWidth = 32;
+                            const spacing = (440 - barWidth * 7) / 6;
+                            const x = 50 + idx * (barWidth + spacing);
+                            const barHeight = (d.count / maxCount) * 140;
+                            const y = 170 - barHeight;
+                            
+                            return (
+                              <g key={idx} className="group cursor-pointer">
+                                {/* Invisible interactive hover background */}
+                                <rect x={x - 4} y="10" width={barWidth + 8} height="165" fill="transparent" />
+                                {/* Glowing backdrop on hover */}
+                                <rect 
+                                  x={x - 2} 
+                                  y={y - 2} 
+                                  width={barWidth + 4} 
+                                  height={barHeight + 2} 
+                                  rx="5" 
+                                  className="fill-orange-500/0 group-hover:fill-orange-500/10 transition-all duration-200"
+                                />
+                                {/* Bar */}
+                                <rect 
+                                  x={x} 
+                                  y={y} 
+                                  width={barWidth} 
+                                  height={Math.max(barHeight, 4)} 
+                                  rx="3" 
+                                  className={`${d.count > 0 ? 'fill-orange-500 shadow-lg' : 'fill-slate-200 dark:fill-white/10'} transition-all duration-300`}
+                                />
+                                {/* Label */}
+                                <text 
+                                  x={x + barWidth / 2} 
+                                  y="188" 
+                                  textAnchor="middle" 
+                                  className="text-[9px] fill-slate-400 dark:fill-slate-500 font-semibold"
+                                >
+                                  {d.label}
+                                </text>
+                                {/* Tooltip count */}
+                                <text 
+                                  x={x + barWidth / 2} 
+                                  y={y - 8} 
+                                  textAnchor="middle" 
+                                  className="text-[10px] font-extrabold fill-slate-800 dark:fill-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                >
+                                  {d.count}
+                                </text>
+                              </g>
+                            );
+                          })}
+                        </svg>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Recent Activity Feed */}
+                <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 shadow-sm flex flex-col gap-4">
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-white text-lg">Recent Inquiries</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Latest form submissions from your website.</p>
+                  </div>
+
+                  <div className="flex-1 flex flex-col gap-4 overflow-y-auto max-h-[260px]">
+                    {messageList.length === 0 ? (
+                      <p className="text-slate-500 dark:text-slate-400 text-sm py-4 text-center">No messages received yet.</p>
+                    ) : (
+                      messageList.slice(0, 3).map((msg) => (
+                        <div key={msg._id} className="p-4 rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#02050E]/40 flex flex-col gap-1.5 hover:border-slate-200 dark:hover:border-white/10 transition-colors">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-slate-900 dark:text-white text-sm line-clamp-1">{msg.name}</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">
+                              {new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">({msg.email})</span>
+                          <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  
+                  {messageList.length > 0 && (
+                    <button 
+                      onClick={() => setActiveTab('messages')}
+                      className="w-full py-2 rounded-xl text-xs font-semibold text-center border border-orange-500/20 text-orange-500 hover:bg-orange-500/10 transition-all mt-2"
+                    >
+                      View All Messages ({messageList.length})
+                    </button>
+                  )}
+                </div>
+
+              </div>
+
             </div>
           )}
 

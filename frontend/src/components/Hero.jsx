@@ -107,6 +107,7 @@ function Hero() {
             <img 
               src="/arunabha.png" 
               alt="Arunabha Nag" 
+              fetchPriority="high"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute bottom-4 left-4 right-4 bg-black/40 backdrop-blur-sm border border-white/5 rounded-xl p-3 text-center text-white">
