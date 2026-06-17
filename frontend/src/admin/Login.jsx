@@ -27,7 +27,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await API.post('/api/auth/login', credentials);
+      const response = await API.post('/auth/login', credentials);
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminUser', response.data.username);
       navigate('/admin/dashboard', { replace: true });

@@ -36,7 +36,7 @@ function Contact() {
     setLoading(true);
 
     try {
-      const response = await API.post('/api/messages', formData);
+      const response = await API.post('/messages', formData);
       setFeedback({ success: true, message: response.data.message || 'Message delivered successfully!' });
       setFormData({ name: '', email: '', message: '' });
     } catch (error) {

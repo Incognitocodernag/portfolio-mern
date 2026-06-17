@@ -44,7 +44,7 @@ function Timeline() {
   useEffect(() => {
     const fetchTimeline = async () => {
       try {
-        const response = await API.get('/api/portfolio/timeline');
+        const response = await API.get('/portfolio/timeline');
         if (Array.isArray(response.data) && response.data.length > 0) {
           setMilestones(response.data);
         } else {

@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const nodemailer = require('nodemailer');
 const Message = require('../models/Message');
 const auth = require('../middleware/auth');
+const logger = require('../logger');
 
 // Public: Submit a contact message
 router.post('/', async (req, res) => {
@@ -39,8 +41,48 @@ router.post('/', async (req, res) => {
       message: sanitizedMessage 
     });
     await newMessage.save();
+    
+    // Asynchronous Email Notification Dispatch (Nodemailer)
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASS;
+    const emailTarget = 'arunabhadeveloper@gmail.com';
+
+    if (emailUser && emailPass) {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: emailUser,
+          pass: emailPass
+        }
+      });
+
+      const mailOptions = {
+        from: `"Portfolio Alerts" <${emailUser}>`,
+        to: emailTarget,
+        subject: `💼 New Portfolio Message from ${sanitizedName}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; border: 1px solid #eee; border-radius: 8px;">
+            <h2 style="color: #f97316;">New Contact Form Submission</h2>
+            <p><strong>Name:</strong> ${sanitizedName}</p>
+            <p><strong>Email:</strong> ${sanitizedEmail}</p>
+            <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+            <p><strong>Message:</strong></p>
+            <p style="white-space: pre-wrap; padding: 15px; background-color: #f9f9f9; border-radius: 6px; border-left: 4px solid #f97316; font-size: 14px; line-height: 1.6;">${sanitizedMessage}</p>
+          </div>
+        `
+      };
+
+      transporter.sendMail(mailOptions)
+        .then(() => logger.info(`Email notification sent to ${emailTarget} for contact form from ${sanitizedEmail}`))
+        .catch(err => logger.error('Nodemailer email dispatch failed: %O', err));
+    } else {
+      logger.warn('Nodemailer SMTP credentials missing. Skipping email notification.');
+    }
+
     res.status(201).json({ message: 'Message sent successfully' });
   } catch (error) {
+    logger.error('Error saving contact form message: %O', error);
     res.status(500).json({ message: 'Server error saving message' });
   }
 });

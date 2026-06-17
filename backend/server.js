@@ -3,10 +3,20 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
+const morgan = require('morgan');
+const logger = require('./logger');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Set up HTTP request logging using Morgan and Winston
+const morganFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
+app.use(morgan(morganFormat, {
+  stream: {
+    write: (message) => logger.info(message.trim())
+  }
+}));
 
 // 1. Secure HTTP headers using Helmet
 app.use(helmet());
@@ -47,30 +57,33 @@ app.use('/api/', apiLimiter);
 // Database Connection
 const mongoURI = process.env.MONGO_URI;
 if (!mongoURI) {
-  console.warn('WARNING: MONGO_URI environment variable is missing. Database functionality will fail.');
+  logger.warn('WARNING: MONGO_URI environment variable is missing. Database functionality will fail.');
 } else {
   mongoose.connect(mongoURI)
-    .then(() => console.log('MongoDB connection established successfully.'))
-    .catch((error) => console.error('MongoDB connection error:', error));
+    .then(() => logger.info('MongoDB connection established successfully.'))
+    .catch((error) => logger.error('MongoDB connection error: %O', error));
 }
 
 // Public status route
 app.get('/api/status', (req, res) => {
   res.json({ status: 'API is running successfully', dbConnected: mongoose.connection.readyState === 1 });
 });
+app.get('/api/v1/status', (req, res) => {
+  res.json({ status: 'API v1 is running successfully', dbConnected: mongoose.connection.readyState === 1 });
+});
 
 // Register Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/portfolio', require('./routes/portfolio'));
-app.use('/api/messages', require('./routes/messages'));
+app.use('/api/v1/auth', require('./routes/auth'));
+app.use('/api/v1/portfolio', require('./routes/portfolio'));
+app.use('/api/v1/messages', require('./routes/messages'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error('Unhandled server error: %O', err);
   res.status(500).json({ message: 'An internal server error occurred.' });
 });
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server is running on port: ${PORT}`);
+  logger.info(`Server is running on port: ${PORT}`);
 });

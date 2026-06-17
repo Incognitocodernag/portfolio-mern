@@ -56,9 +56,9 @@ function Dashboard() {
     setLoading(true);
     try {
       const [msgRes, projRes, timeRes] = await Promise.all([
-        API.get('/api/messages'),
-        API.get('/api/portfolio/projects'),
-        API.get('/api/portfolio/timeline')
+        API.get('/messages'),
+        API.get('/portfolio/projects'),
+        API.get('/portfolio/timeline')
       ]);
       setMessageList(msgRes.data);
       setProjectList(projRes.data);
@@ -83,10 +83,10 @@ function Dashboard() {
 
     try {
       if (editingProject) {
-        await API.put(`/api/portfolio/projects/${editingProject._id}`, payload);
+        await API.put(`/portfolio/projects/${editingProject._id}`, payload);
         showAlert('success', 'Project updated successfully.');
       } else {
-        await API.post('/api/portfolio/projects', payload);
+        await API.post('/portfolio/projects', payload);
         showAlert('success', 'Project created successfully.');
       }
       setProjectForm({ title: '', description: '', tags: '', repoLink: '', liveLink: '' });
@@ -111,7 +111,7 @@ function Dashboard() {
   const handleDeleteProject = async (id) => {
     if (!window.confirm('Delete this project permanently?')) return;
     try {
-      await API.delete(`/api/portfolio/projects/${id}`);
+      await API.delete(`/portfolio/projects/${id}`);
       showAlert('success', 'Project deleted successfully.');
       fetchData();
     } catch (err) {
@@ -128,10 +128,10 @@ function Dashboard() {
 
     try {
       if (editingMilestone) {
-        await API.put(`/api/portfolio/timeline/${editingMilestone._id}`, payload);
+        await API.put(`/portfolio/timeline/${editingMilestone._id}`, payload);
         showAlert('success', 'Milestone updated successfully.');
       } else {
-        await API.post('/api/portfolio/timeline', payload);
+        await API.post('/portfolio/timeline', payload);
         showAlert('success', 'Milestone created successfully.');
       }
       setMilestoneForm({ type: 'Education', title: '', organization: '', duration: '', bullets: '' });
@@ -156,7 +156,7 @@ function Dashboard() {
   const handleDeleteMilestone = async (id) => {
     if (!window.confirm('Delete this timeline milestone permanently?')) return;
     try {
-      await API.delete(`/api/portfolio/timeline/${id}`);
+      await API.delete(`/portfolio/timeline/${id}`);
       showAlert('success', 'Timeline milestone deleted.');
       fetchData();
     } catch (err) {
@@ -167,7 +167,7 @@ function Dashboard() {
   const handleDeleteMessage = async (id) => {
     if (!window.confirm('Delete this message permanently?')) return;
     try {
-      await API.delete(`/api/messages/${id}`);
+      await API.delete(`/messages/${id}`);
       showAlert('success', 'Contact message deleted.');
       fetchData();
     } catch (err) {

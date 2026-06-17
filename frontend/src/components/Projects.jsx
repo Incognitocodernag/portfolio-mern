@@ -20,7 +20,7 @@ function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await API.get('/api/portfolio/projects');
+        const response = await API.get('/portfolio/projects');
         if (Array.isArray(response.data) && response.data.length > 0) {
           setProjects(response.data);
         } else {

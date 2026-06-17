@@ -4,7 +4,7 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const API = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_URL + '/api/v1',
 });
 
 // Interceptor to securely inject JWT bearer headers on all admin requests
