@@ -17,7 +17,8 @@ import {
   LayoutDashboard,
   Clock,
   TrendingUp,
-  Inbox
+  Inbox,
+  Cpu
 } from 'lucide-react';
 
 function Dashboard() {
@@ -26,6 +27,7 @@ function Dashboard() {
   const [messageList, setMessageList] = useState([]);
   const [projectList, setProjectList] = useState([]);
   const [timelineList, setTimelineList] = useState([]);
+  const [skillList, setSkillList] = useState([]);
   
   const [alert, setAlert] = useState({ type: '', text: '' });
   
@@ -34,6 +36,9 @@ function Dashboard() {
   
   const [editingMilestone, setEditingMilestone] = useState(null);
   const [milestoneForm, setMilestoneForm] = useState({ type: 'Education', title: '', organization: '', duration: '', bullets: '' });
+
+  const [editingSkill, setEditingSkill] = useState(null);
+  const [skillForm, setSkillForm] = useState({ name: '', category: 'General', iconClass: '' });
 
   const navigate = useNavigate();
 
@@ -55,14 +60,16 @@ function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [msgRes, projRes, timeRes] = await Promise.all([
+      const [msgRes, projRes, timeRes, skillRes] = await Promise.all([
         API.get('/messages'),
         API.get('/portfolio/projects'),
-        API.get('/portfolio/timeline')
+        API.get('/portfolio/timeline'),
+        API.get('/portfolio/skills')
       ]);
       setMessageList(msgRes.data);
       setProjectList(projRes.data);
       setTimelineList(timeRes.data);
+      setSkillList(skillRes.data);
     } catch (err) {
       if (err.response?.status === 401) {
         handleLogout();
@@ -175,6 +182,45 @@ function Dashboard() {
     }
   };
 
+  const handleSkillSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingSkill) {
+        await API.put(`/portfolio/skills/${editingSkill._id}`, skillForm);
+        showAlert('success', 'Skill updated successfully.');
+      } else {
+        await API.post('/portfolio/skills', skillForm);
+        showAlert('success', 'Skill created successfully.');
+      }
+      setSkillForm({ name: '', category: 'General', iconClass: '' });
+      setEditingSkill(null);
+      fetchData();
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to save skill records.';
+      showAlert('error', errMsg);
+    }
+  };
+
+  const handleEditSkillClick = (skill) => {
+    setEditingSkill(skill);
+    setSkillForm({
+      name: skill.name,
+      category: skill.category,
+      iconClass: skill.iconClass || ''
+    });
+  };
+
+  const handleDeleteSkill = async (id) => {
+    if (!window.confirm('Delete this skill permanently?')) return;
+    try {
+      await API.delete(`/portfolio/skills/${id}`);
+      showAlert('success', 'Skill deleted successfully.');
+      fetchData();
+    } catch (err) {
+      showAlert('error', 'Failed to delete skill.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#02050E] flex flex-col transition-colors duration-300">
       
@@ -262,6 +308,19 @@ function Dashboard() {
             </div>
             <ChevronRight className="w-4 h-4" />
           </button>
+
+          <button 
+            onClick={() => setActiveTab('skills')}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold transition-all ${
+              activeTab === 'skills' ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Cpu className="w-5 h-5" />
+              <span>Skills</span>
+            </div>
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </aside>
 
         {/* Right Tab Content */}
@@ -293,7 +352,7 @@ function Dashboard() {
               </div>
 
               {/* Stats Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 
                 {/* Total Messages */}
                 <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
@@ -305,7 +364,7 @@ function Dashboard() {
                     <Inbox className="w-6 h-6" />
                   </div>
                 </div>
-
+ 
                 {/* Messages Today */}
                 <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
                   <div className="flex flex-col gap-1.5">
@@ -318,7 +377,7 @@ function Dashboard() {
                     <Clock className="w-6 h-6" />
                   </div>
                 </div>
-
+ 
                 {/* Projects Showcase */}
                 <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
                   <div className="flex flex-col gap-1.5">
@@ -329,7 +388,7 @@ function Dashboard() {
                     <Briefcase className="w-6 h-6" />
                   </div>
                 </div>
-
+ 
                 {/* Growth Milestones */}
                 <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
                   <div className="flex flex-col gap-1.5">
@@ -338,6 +397,17 @@ function Dashboard() {
                   </div>
                   <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 rounded-xl">
                     <Calendar className="w-6 h-6" />
+                  </div>
+                </div>
+
+                {/* Managed Skills */}
+                <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Skills Track</span>
+                    <span className="text-3xl font-extrabold text-slate-900 dark:text-white">{skillList.length}</span>
+                  </div>
+                  <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl">
+                    <Cpu className="w-6 h-6" />
                   </div>
                 </div>
 
@@ -769,6 +839,127 @@ function Dashboard() {
                         onClick={() => {
                           setEditingMilestone(null);
                           setMilestoneForm({ type: 'Education', title: '', organization: '', duration: '', bullets: '' });
+                        }}
+                        className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-xs text-slate-700 dark:text-slate-300"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+
+            </div>
+          )}
+
+          {/* Skills Tab */}
+          {!loading && activeTab === 'skills' && (
+            <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-12 items-start">
+              
+              <div className="flex flex-col gap-6">
+                <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Manage Skills ({skillList.length})</h2>
+                {skillList.length === 0 ? (
+                  <p className="text-slate-500 dark:text-slate-400">No skills registered yet. Add one on the right.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {skillList.map((skill) => (
+                      <div key={skill._id} className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-5 flex justify-between items-center gap-4 shadow-sm dark:shadow-none">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200 dark:border-white/5">
+                            <i className={`${skill.iconClass || 'fa-solid fa-code'} text-xl`}></i>
+                          </div>
+                          <div>
+                            <h3 className="text-slate-900 dark:text-white font-bold text-sm">{skill.name}</h3>
+                            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{skill.category}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <button 
+                            onClick={() => handleEditSkillClick(skill)}
+                            className="p-1.5 text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors"
+                            title="Edit skill"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteSkill(skill._id)}
+                            className="p-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                            title="Delete skill"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050914]/40 p-6 shadow-lg backdrop-blur-md">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-orange-500" />
+                  <span>{editingSkill ? 'Edit Skill' : 'Add New Skill'}</span>
+                </h3>
+                <form onSubmit={handleSkillSubmit} className="flex flex-col gap-4">
+                  
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Skill Name</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={skillForm.name}
+                      onChange={(e) => setSkillForm({...skillForm, name: e.target.value})}
+                      placeholder="React.js"
+                      className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Category</label>
+                    <select 
+                      value={skillForm.category}
+                      onChange={(e) => setSkillForm({...skillForm, category: e.target.value})}
+                      className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                    >
+                      <option value="Frontend">Frontend</option>
+                      <option value="Backend">Backend</option>
+                      <option value="Database">Database</option>
+                      <option value="Languages">Languages</option>
+                      <option value="Tools">Tools</option>
+                      <option value="General">General</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">FontAwesome Icon Class (with color classes)</label>
+                    <input 
+                      type="text" 
+                      value={skillForm.iconClass}
+                      onChange={(e) => setSkillForm({...skillForm, iconClass: e.target.value})}
+                      placeholder="fa-brands fa-react text-sky-400"
+                      className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                    />
+                    <div className="text-[10px] text-slate-400">
+                      Standard examples: <br/>
+                      • <b>React</b>: <code className="text-[10px] select-all text-slate-300 bg-slate-800 px-1 py-0.5 rounded">fa-brands fa-react text-sky-400</code><br/>
+                      • <b>Node</b>: <code className="text-[10px] select-all text-slate-300 bg-slate-800 px-1 py-0.5 rounded">fa-brands fa-node-js text-green-500</code><br/>
+                      • <b>Database</b>: <code className="text-[10px] select-all text-slate-300 bg-slate-800 px-1 py-0.5 rounded">fa-solid fa-database text-green-600</code>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mt-2">
+                    <button 
+                      type="submit" 
+                      className="flex-1 py-2.5 rounded-lg bg-orange-500 text-black font-bold hover:bg-orange-600 transition-colors text-sm"
+                    >
+                      {editingSkill ? 'Save Edits' : 'Create Skill'}
+                    </button>
+                    {editingSkill && (
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setEditingSkill(null);
+                          setSkillForm({ name: '', category: 'General', iconClass: '' });
                         }}
                         className="px-4 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-xs text-slate-700 dark:text-slate-300"
                       >

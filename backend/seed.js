@@ -9,6 +9,7 @@ require('dotenv').config();
 const User = require('./models/User');
 const Project = require('./models/Project');
 const Timeline = require('./models/Timeline');
+const Skill = require('./models/Skill');
 
 const seedData = async () => {
   const mongoURI = process.env.MONGO_URI;
@@ -87,6 +88,22 @@ const seedData = async () => {
     ];
     await Timeline.insertMany(initialTimeline);
     console.log('✓ Seeding timeline milestones completed.');
+
+    // 4. Seed Skills
+    await Skill.deleteMany({});
+    const initialSkills = [
+      { name: 'React.js', category: 'Frontend', iconClass: 'fa-brands fa-react text-sky-400' },
+      { name: 'Node.js', category: 'Backend', iconClass: 'fa-brands fa-node-js text-green-500' },
+      { name: 'Express.js', category: 'Backend', iconClass: 'fa-solid fa-server text-slate-400' },
+      { name: 'MongoDB', category: 'Database', iconClass: 'fa-solid fa-database text-green-600' },
+      { name: 'Tailwind CSS', category: 'Frontend', iconClass: 'fa-solid fa-wind text-cyan-400' },
+      { name: 'JavaScript', category: 'Languages', iconClass: 'fa-brands fa-js text-yellow-400' },
+      { name: 'SQL / DBMS', category: 'Database', iconClass: 'fa-solid fa-table text-purple-400' },
+      { name: 'C++', category: 'Languages', iconClass: 'fa-solid fa-cubes text-blue-500' },
+      { name: 'Git / GitHub', category: 'Tools', iconClass: 'fa-brands fa-git-alt text-red-500' }
+    ];
+    await Skill.insertMany(initialSkills);
+    console.log('✓ Seeding default skills completed.');
 
     console.log('Database seeding successfully finished!');
     mongoose.connection.close();
