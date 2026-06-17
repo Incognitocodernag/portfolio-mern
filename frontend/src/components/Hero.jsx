@@ -103,10 +103,12 @@ function Hero() {
       {/* Visual Placeholder Card */}
       <div className="flex flex-col items-center gap-6 w-full max-w-[420px] shrink-0 relative z-10">
         <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050914]/80 p-4 w-full shadow-2xl backdrop-blur-md hover:border-orange-500/30 transition-all duration-500 group">
-          <div className="aspect-square w-full rounded-2xl bg-gradient-to-tr from-[#1B1913] to-[#243620] overflow-hidden flex items-center justify-center relative">
-            <svg className="w-1/2 h-1/2 text-orange-500/40 group-hover:scale-105 transition-transform duration-500" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
+          <div className="aspect-square w-full rounded-2xl overflow-hidden relative bg-slate-100 dark:bg-[#0b132b]">
+            <img 
+              src="/arunabha.png" 
+              alt="Arunabha Nag" 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
             <div className="absolute bottom-4 left-4 right-4 bg-black/40 backdrop-blur-sm border border-white/5 rounded-xl p-3 text-center text-white">
               <span className="text-xs text-orange-500 font-bold uppercase tracking-wider">Academic Focus</span>
               <p className="text-sm font-semibold">Web Development & Core CS</p>
