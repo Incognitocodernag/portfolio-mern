@@ -122,7 +122,7 @@ function Hero() {
           <a href="https://www.linkedin.com/in/arunabha-nag-a75053306/" className="hover:text-orange-500 transition-colors duration-300" target="_blank" rel="noopener noreferrer">
             <Linkedin className="w-6 h-6" />
           </a>
-          <a href="https://github.com/ArunabhaNag" className="hover:text-orange-500 transition-colors duration-300" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/Incognitocodernag" className="hover:text-orange-500 transition-colors duration-300" target="_blank" rel="noopener noreferrer">
             <Github className="w-6 h-6" />
           </a>
         </div>

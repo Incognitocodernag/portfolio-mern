@@ -8,8 +8,8 @@ const FALLBACK_PROJECTS = [
     title: 'WealthifyMe',
     description: 'A full-stack personal finance and wealth tracker built with the MERN stack. Features secure user authentication, interactive dashboards, structured MongoDB database schemas for transaction logging, and robust Express.js REST API endpoints to monitor expenses and savings goals.',
     tags: ['MongoDB', 'Express.js', 'React.js', 'Node.js', 'Tailwind CSS'],
-    repoLink: 'https://github.com/ArunabhaNag',
-    liveLink: 'https://github.com/ArunabhaNag'
+    repoLink: 'https://github.com/Incognitocodernag',
+    liveLink: 'https://github.com/Incognitocodernag'
   }
 ];
 
