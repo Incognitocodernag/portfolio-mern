@@ -71,8 +71,8 @@ function Contact() {
               <div>
                 <span className="text-slate-500 dark:text-slate-400 text-xs uppercase font-bold tracking-wider">Direct Email</span>
                 <p className="text-slate-800 dark:text-white font-semibold">
-                  <a href="mailto:arunabha.nag@example.com" className="hover:text-orange-500 transition-colors">
-                    arunabha.nag@example.com
+                  <a href="mailto:arunabhadeveloper@gmail.com" className="hover:text-orange-500 transition-colors">
+                    arunabhadeveloper@gmail.com
                   </a>
                 </p>
               </div>
