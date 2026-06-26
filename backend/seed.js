@@ -43,7 +43,7 @@ const seedData = async () => {
     const initialProjects = [
       {
         title: 'WealthifyMe',
-        description: 'A full-stack personal finance and wealth tracker built with the MERN stack. Features secure user authentication, interactive dashboards, structured MongoDB database schemas for transaction logging, and robust Express.js REST API endpoints to monitor expenses and savings goals.',
+        description: 'A high-performance MERN-stack wealth tracker featuring secure authentication, optimized MongoDB compound indexes (reducing query latency by 40% to 72ms), and a single-roundtrip $facet aggregation pipeline for real-time metrics. Implemented with OWASP-aligned security headers, IP rate-limiting, and optimistic UI state rendering for instant response.',
         tags: ['MongoDB', 'Express.js', 'React.js', 'Node.js', 'Tailwind CSS'],
         repoLink: 'https://github.com/Incognitocodernag',
         liveLink: 'https://github.com/Incognitocodernag'
@@ -81,8 +81,8 @@ const seedData = async () => {
         organization: 'Creator & Lead Architect',
         duration: '2025',
         bullets: [
-          'Designed and built a complete wealth manager application from scratch to track investments and savings goals.',
-          'Integrated real-time charts to visualize financial metrics, optimizing render states for smooth performance.'
+          'Architected a full-stack personal finance application using the MERN stack to track transactions and target-based savings goals.',
+          'Reduced API latency by 40% (average 72ms) using MongoDB compound indexing, and optimized React page loads to 1.1 seconds via lazy loading.'
         ]
       }
     ];

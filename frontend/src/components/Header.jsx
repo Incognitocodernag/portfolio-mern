@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, FileDown } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 function Header() {
@@ -12,6 +12,15 @@ function Header() {
       </a>
       
       <div className="flex items-center gap-3 md:gap-5 shrink-0">
+        <a 
+          className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-300" 
+          href="/Arunabha_Nag_CV.pdf"
+          download="Arunabha_Nag_CV.pdf"
+        >
+          <FileDown className="w-4 h-4 text-orange-500" />
+          <span>Resume</span>
+        </a>
+
         <a className="group flex items-center gap-2 px-4 py-2 rounded-lg border border-orange-500 text-orange-500 text-sm font-semibold hover:bg-orange-500 hover:text-black transition-all duration-300" href="#journey">
           <span>Timeline</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

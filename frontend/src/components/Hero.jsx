@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Laptop, FolderOpen, Bolt, ArrowDown, Linkedin, Github } from 'lucide-react';
+import { GraduationCap, Laptop, FolderOpen, Bolt, ArrowDown, Linkedin, Github, FileDown } from 'lucide-react';
 
 const WORDS = [
   "scalable websites.",
@@ -92,6 +92,14 @@ function Hero() {
         <div className="flex flex-wrap gap-4 mt-6">
           <a href="#projects" className="px-8 py-4 rounded-lg bg-orange-500 text-black font-bold text-base md:text-lg hover:bg-orange-600 hover:shadow-xl hover:shadow-orange-500/20 transition-all duration-300">
             View My Work
+          </a>
+          <a 
+            href="/Arunabha_Nag_CV.pdf" 
+            download="Arunabha_Nag_CV.pdf" 
+            className="px-8 py-4 rounded-lg border border-orange-500 text-orange-500 font-bold text-base md:text-lg hover:bg-orange-500 hover:text-black transition-all duration-300 flex items-center gap-2"
+          >
+            <FileDown className="w-5 h-5" />
+            <span>Download CV</span>
           </a>
           <a href="#contact" className="px-8 py-4 rounded-lg border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white font-semibold text-base md:text-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-300 flex items-center gap-2">
             <span>Get in Touch</span>

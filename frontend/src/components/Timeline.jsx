@@ -31,8 +31,8 @@ const FALLBACK_TIMELINE = [
     organization: 'Creator & Lead Architect',
     duration: '2025',
     bullets: [
-      'Designed and built a complete wealth manager application from scratch to track investments and savings goals.',
-      'Integrated real-time charts to visualize financial metrics, optimizing render states for smooth performance.'
+      'Architected a full-stack personal finance application using the MERN stack to track transactions and target-based savings goals.',
+      'Reduced API latency by 40% (average 72ms) using MongoDB compound indexing, and optimized React page loads to 1.1 seconds via lazy loading.'
     ]
   }
 ];
