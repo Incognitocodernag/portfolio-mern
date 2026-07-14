@@ -29,7 +29,12 @@ const SECURITY_QUESTIONS = [
   "What is your mother's maiden name?",
   "What city were you born in?",
   "What was the name of your first school?",
-  "What is your favorite book?"
+  "What is your favorite book?",
+  "What is the name of your favorite movie?",
+  "What was your childhood nickname?",
+  "In what city did your parents meet?",
+  "What is the name of the street you grew up on?",
+  "Who was your childhood hero?"
 ];
 
 function Dashboard() {
