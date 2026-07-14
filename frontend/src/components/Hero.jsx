@@ -94,12 +94,12 @@ function Hero() {
             View My Work
           </a>
           <a 
-            href="/Arunabha_Nag_CV.pdf" 
-            download="Arunabha_Nag_CV.pdf" 
+            href="/Arunabha_Nag_Resume.pdf" 
+            download="Arunabha_Nag_Resume.pdf" 
             className="px-8 py-4 rounded-lg border border-orange-500 text-orange-500 font-bold text-base md:text-lg hover:bg-orange-500 hover:text-black transition-all duration-300 flex items-center gap-2"
           >
             <FileDown className="w-5 h-5" />
-            <span>Download CV</span>
+            <span>Download Resume</span>
           </a>
           <a href="#contact" className="px-8 py-4 rounded-lg border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white font-semibold text-base md:text-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-300 flex items-center gap-2">
             <span>Get in Touch</span>
