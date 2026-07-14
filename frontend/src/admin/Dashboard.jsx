@@ -462,7 +462,7 @@ function Dashboard() {
               </div>
 
               {/* Stats Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                 
                 {/* Total Messages */}
                 <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#050914] p-6 flex items-center justify-between shadow-sm">
