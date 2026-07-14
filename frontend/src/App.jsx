@@ -4,6 +4,7 @@ import MainPortfolio from './components/MainPortfolio';
 
 // Lazy load admin routes to optimize bundle size and page load speed
 const Login = React.lazy(() => import('./admin/Login'));
+const Register = React.lazy(() => import('./admin/Register'));
 const Dashboard = React.lazy(() => import('./admin/Dashboard'));
 
 // Loading fallback spinner for lazy-loaded route chunks
@@ -32,6 +33,7 @@ function App() {
           
           {/* Admin Authentication routes */}
           <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/register" element={<Register />} />
           <Route 
             path="/admin/dashboard" 
             element={

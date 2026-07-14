@@ -40,15 +40,60 @@ function Dashboard() {
   const [editingSkill, setEditingSkill] = useState(null);
   const [skillForm, setSkillForm] = useState({ name: '', category: 'General', iconClass: '' });
 
+  // Settings State variables
+  const [settingsForm, setSettingsForm] = useState({ username: '', currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsAlert, setSettingsAlert] = useState({ type: '', text: '' });
+
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
+    // Initialize settings form with current logged in user
+    const user = localStorage.getItem('adminUser') || '';
+    setSettingsForm(prev => ({ ...prev, username: user }));
   }, []);
 
   const showAlert = (type, text) => {
     setAlert({ type, text });
     setTimeout(() => setAlert({ type: '', text: '' }), 4000);
+  };
+
+  const handleSettingsSubmit = async (e) => {
+    e.preventDefault();
+    setSettingsAlert({ type: '', text: '' });
+
+    if (settingsForm.newPassword && settingsForm.newPassword.length < 6) {
+      setSettingsAlert({ type: 'error', text: 'New password must be at least 6 characters long.' });
+      return;
+    }
+
+    if (settingsForm.newPassword !== settingsForm.confirmPassword) {
+      setSettingsAlert({ type: 'error', text: 'New passwords do not match.' });
+      return;
+    }
+
+    setSettingsLoading(true);
+    try {
+      const payload = {};
+      if (settingsForm.username) payload.username = settingsForm.username;
+      if (settingsForm.newPassword) {
+        payload.currentPassword = settingsForm.currentPassword;
+        payload.newPassword = settingsForm.newPassword;
+      }
+
+      const response = await API.put('/auth/update-profile', payload);
+      setSettingsAlert({ type: 'success', text: response.data.message || 'Security settings updated successfully.' });
+      if (response.data.username) {
+        localStorage.setItem('adminUser', response.data.username);
+      }
+      setSettingsForm(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to update security settings.';
+      setSettingsAlert({ type: 'error', text: msg });
+    } finally {
+      setSettingsLoading(false);
+    }
   };
 
   const handleLogout = () => {
@@ -318,6 +363,19 @@ function Dashboard() {
             <div className="flex items-center gap-3">
               <Cpu className="w-5 h-5" />
               <span>Skills</span>
+            </div>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('settings')}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold transition-all ${
+              activeTab === 'settings' ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <FolderLock className="w-5 h-5" />
+              <span>Settings</span>
             </div>
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -941,9 +999,9 @@ function Dashboard() {
                     />
                     <div className="text-[10px] text-slate-400">
                       Standard examples: <br/>
-                      • <b>React</b>: <code className="text-[10px] select-all text-slate-300 bg-slate-800 px-1 py-0.5 rounded">fa-brands fa-react text-sky-400</code><br/>
-                      • <b>Node</b>: <code className="text-[10px] select-all text-slate-300 bg-slate-800 px-1 py-0.5 rounded">fa-brands fa-node-js text-green-500</code><br/>
-                      • <b>Database</b>: <code className="text-[10px] select-all text-slate-300 bg-slate-800 px-1 py-0.5 rounded">fa-solid fa-database text-green-600</code>
+                      &bull; <b>React</b>: <code className="text-[10px] select-all text-slate-300 bg-slate-800 px-1 py-0.5 rounded">fa-brands fa-react text-sky-400</code><br/>
+                      &bull; <b>Node</b>: <code className="text-[10px] select-all text-slate-300 bg-slate-800 px-1 py-0.5 rounded">fa-brands fa-node-js text-green-500</code><br/>
+                      &bull; <b>Database</b>: <code className="text-[10px] select-all text-slate-300 bg-slate-800 px-1 py-0.5 rounded">fa-solid fa-database text-green-600</code>
                     </div>
                   </div>
 
@@ -970,6 +1028,80 @@ function Dashboard() {
                 </form>
               </div>
 
+            </div>
+          )}
+
+          {/* Settings Tab */}
+          {!loading && activeTab === 'settings' && (
+            <div className="max-w-[500px] rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050914]/40 p-8 shadow-lg backdrop-blur-md">
+              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">Security Settings</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-8">Update your administrative credentials and secure your account access.</p>
+              
+              {settingsAlert.text && (
+                <div className={`p-4 rounded-xl border text-sm font-semibold mb-6 ${
+                  settingsAlert.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                }`}>
+                  {settingsAlert.text}
+                </div>
+              )}
+
+              <form onSubmit={handleSettingsSubmit} className="flex flex-col gap-6">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Change Admin Username</label>
+                  <input
+                    type="text"
+                    required
+                    value={settingsForm.username}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, username: e.target.value })}
+                    placeholder="New Admin Username"
+                    className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                  />
+                </div>
+
+                <hr className="border-slate-200 dark:border-white/5 my-2" />
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Current Password (Required for Password Change)</label>
+                  <input
+                    type="password"
+                    value={settingsForm.currentPassword}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, currentPassword: e.target.value })}
+                    placeholder="Verify Current Password"
+                    className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">New Password</label>
+                  <input
+                    type="password"
+                    value={settingsForm.newPassword}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, newPassword: e.target.value })}
+                    placeholder="Enter New Password (min 6 characters)"
+                    className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={settingsForm.confirmPassword}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, confirmPassword: e.target.value })}
+                    placeholder="Confirm New Password"
+                    className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={settingsLoading}
+                  className="w-full py-3 rounded-lg bg-orange-500 text-black font-bold hover:bg-orange-600 transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+                >
+                  {settingsLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  <span>Save Security Updates</span>
+                </button>
+              </form>
             </div>
           )}
 
