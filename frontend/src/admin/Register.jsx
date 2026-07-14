@@ -2,10 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../config';
 import ThemeToggle from '../components/ThemeToggle';
-import { UserPlus, User, Lock, Loader2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { UserPlus, User, Lock, Loader2, ShieldCheck, ArrowRight, Eye, EyeOff, HelpCircle } from 'lucide-react';
+
+const SECURITY_QUESTIONS = [
+  "What was the name of your first pet?",
+  "What is your mother's maiden name?",
+  "What city were you born in?",
+  "What was the name of your first school?",
+  "What is your favorite book?"
+];
 
 function Register() {
-  const [credentials, setCredentials] = useState({ username: '', password: '', confirmPassword: '' });
+  const [credentials, setCredentials] = useState({ 
+    username: '', 
+    password: '', 
+    confirmPassword: '',
+    securityQuestion: SECURITY_QUESTIONS[0],
+    securityAnswer: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(true);
   const [adminExists, setAdminExists] = useState(false);
@@ -22,7 +38,6 @@ function Register() {
         setAdminExists(response.data.adminInitialized);
       } catch (err) {
         console.error('Error fetching admin status:', err);
-        // Fallback to safe side
         setAdminExists(false);
       } finally {
         setCheckingStatus(false);
@@ -51,16 +66,23 @@ function Register() {
       return;
     }
 
+    if (credentials.securityAnswer.trim().length < 2) {
+      setError('Please provide a valid security answer.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const payload = {
-        username: credentials.username,
-        password: credentials.password
-      };
-      const response = await API.post('/auth/register', payload);
+      const response = await API.post('/auth/register', credentials);
       setSuccess(response.data.message || 'Registration successful! Redirecting...');
-      setCredentials({ username: '', password: '', confirmPassword: '' });
+      setCredentials({ 
+        username: '', 
+        password: '', 
+        confirmPassword: '',
+        securityQuestion: SECURITY_QUESTIONS[0],
+        securityAnswer: ''
+      });
       setTimeout(() => {
         navigate('/admin/login');
       }, 2000);
@@ -91,7 +113,7 @@ function Register() {
       <div className="glow-bg bg-orange-500/10 dark:bg-orange-500/10 top-[-80px] left-[-80px] transition-all duration-300"></div>
       <div className="glow-bg bg-indigo-500/10 dark:bg-indigo-500/10 bottom-[-80px] right-[-80px] transition-all duration-300"></div>
 
-      <div className="w-full max-w-[450px] rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050914]/80 p-8 shadow-2xl backdrop-blur-md relative z-10 transition-colors duration-300">
+      <div className="w-full max-w-[460px] rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#050914]/80 p-8 shadow-2xl backdrop-blur-md relative z-10 transition-colors duration-300">
         
         {adminExists ? (
           // Admin Already Registered Flow
@@ -134,8 +156,9 @@ function Register() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <div className="flex flex-col gap-1.5">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {/* Username */}
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <User className="w-4 h-4 text-slate-400" />
                   <span>Username</span>
@@ -147,46 +170,106 @@ function Register() {
                   value={credentials.username}
                   onChange={handleChange}
                   placeholder="Username" 
-                  className="px-4 py-3 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all duration-300 text-sm"
+                  className="px-4 py-2.5 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all duration-300 text-sm"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              {/* Password */}
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <Lock className="w-4 h-4 text-slate-400" />
                   <span>Password</span>
                 </label>
-                <input 
-                  type="password" 
-                  name="password" 
-                  required
-                  value={credentials.password}
-                  onChange={handleChange}
-                  placeholder="••••••••" 
-                  className="px-4 py-3 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all duration-300 text-sm"
-                />
+                <div className="relative">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    name="password" 
+                    required
+                    value={credentials.password}
+                    onChange={handleChange}
+                    placeholder="••••••••" 
+                    className="w-full pl-4 pr-10 py-2.5 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all duration-300 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              {/* Confirm Password */}
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <Lock className="w-4 h-4 text-slate-400" />
                   <span>Confirm Password</span>
                 </label>
-                <input 
-                  type="password" 
-                  name="confirmPassword" 
-                  required
-                  value={credentials.confirmPassword}
+                <div className="relative">
+                  <input 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    name="confirmPassword" 
+                    required
+                    value={credentials.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="••••••••" 
+                    className="w-full pl-4 pr-10 py-2.5 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all duration-300 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Security Question Selector */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4 text-slate-400" />
+                  <span>Security Recovery Question</span>
+                </label>
+                <select
+                  name="securityQuestion"
+                  value={credentials.securityQuestion}
                   onChange={handleChange}
-                  placeholder="••••••••" 
-                  className="px-4 py-3 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all duration-300 text-sm"
+                  className="px-4 py-2.5 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all duration-300"
+                >
+                  {SECURITY_QUESTIONS.map((q, idx) => (
+                    <option key={idx} value={q} className="bg-white dark:bg-[#050914] text-slate-900 dark:text-white">
+                      {q}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Security Answer */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4 text-slate-400" />
+                  <span>Security Recovery Answer</span>
+                </label>
+                <input 
+                  type="text" 
+                  name="securityAnswer" 
+                  required
+                  value={credentials.securityAnswer}
+                  onChange={handleChange}
+                  placeholder="Recovery answer (case-insensitive)" 
+                  className="px-4 py-2.5 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all duration-300 text-sm"
                 />
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 leading-snug">
+                  *This will be used to recover your account if you forget your password. Keep this safe and private!
+                </span>
               </div>
 
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full py-4 rounded-xl bg-orange-500 text-black font-bold hover:bg-orange-600 transition-colors duration-300 shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 disabled:opacity-50 mt-2 text-sm"
+                className="w-full py-3.5 rounded-xl bg-orange-500 text-black font-bold hover:bg-orange-600 transition-colors duration-300 shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 disabled:opacity-50 mt-2 text-sm"
               >
                 {loading && <Loader2 className="w-5 h-5 animate-spin" />}
                 <span>Initialize Admin</span>

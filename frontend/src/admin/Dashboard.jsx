@@ -18,8 +18,19 @@ import {
   Clock,
   TrendingUp,
   Inbox,
-  Cpu
+  Cpu,
+  Eye,
+  EyeOff,
+  HelpCircle
 } from 'lucide-react';
+
+const SECURITY_QUESTIONS = [
+  "What was the name of your first pet?",
+  "What is your mother's maiden name?",
+  "What city were you born in?",
+  "What was the name of your first school?",
+  "What is your favorite book?"
+];
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -41,7 +52,17 @@ function Dashboard() {
   const [skillForm, setSkillForm] = useState({ name: '', category: 'General', iconClass: '' });
 
   // Settings State variables
-  const [settingsForm, setSettingsForm] = useState({ username: '', currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [settingsForm, setSettingsForm] = useState({ 
+    username: '', 
+    currentPassword: '', 
+    newPassword: '', 
+    confirmPassword: '',
+    securityQuestion: 'What was the name of your first pet?',
+    securityAnswer: ''
+  });
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsAlert, setSettingsAlert] = useState({ type: '', text: '' });
 
@@ -73,13 +94,33 @@ function Dashboard() {
       return;
     }
 
+    if (settingsForm.securityAnswer && settingsForm.securityAnswer.trim().length < 2) {
+      setSettingsAlert({ type: 'error', text: 'Security answer must be at least 2 characters.' });
+      return;
+    }
+
     setSettingsLoading(true);
     try {
       const payload = {};
       if (settingsForm.username) payload.username = settingsForm.username;
-      if (settingsForm.newPassword) {
+      
+      // If updating password or security credentials, currentPassword is required
+      if (settingsForm.newPassword || settingsForm.securityAnswer) {
+        if (!settingsForm.currentPassword) {
+          setSettingsAlert({ type: 'error', text: 'Current password is required to update security credentials.' });
+          setSettingsLoading(false);
+          return;
+        }
         payload.currentPassword = settingsForm.currentPassword;
+      }
+
+      if (settingsForm.newPassword) {
         payload.newPassword = settingsForm.newPassword;
+      }
+
+      if (settingsForm.securityAnswer) {
+        payload.securityQuestion = settingsForm.securityQuestion;
+        payload.securityAnswer = settingsForm.securityAnswer;
       }
 
       const response = await API.put('/auth/update-profile', payload);
@@ -87,7 +128,13 @@ function Dashboard() {
       if (response.data.username) {
         localStorage.setItem('adminUser', response.data.username);
       }
-      setSettingsForm(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+      setSettingsForm(prev => ({ 
+        ...prev, 
+        currentPassword: '', 
+        newPassword: '', 
+        confirmPassword: '', 
+        securityAnswer: '' 
+      }));
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to update security settings.';
       setSettingsAlert({ type: 'error', text: msg });
@@ -1061,46 +1108,101 @@ function Dashboard() {
                 <hr className="border-slate-200 dark:border-white/5 my-2" />
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Current Password (Required for Password Change)</label>
-                  <input
-                    type="password"
-                    value={settingsForm.currentPassword}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, currentPassword: e.target.value })}
-                    placeholder="Verify Current Password"
-                    className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
-                  />
-                </div>
+                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Current Password (Required to make any security updates)</label>
+                   <div className="relative">
+                     <input
+                       type={showCurrentPass ? "text" : "password"}
+                       value={settingsForm.currentPassword}
+                       onChange={(e) => setSettingsForm({ ...settingsForm, currentPassword: e.target.value })}
+                       placeholder="Verify Current Password"
+                       className="w-full pr-10 px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                     />
+                     <button
+                       type="button"
+                       onClick={() => setShowCurrentPass(!showCurrentPass)}
+                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                     >
+                       {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                     </button>
+                   </div>
+                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">New Password</label>
-                  <input
-                    type="password"
-                    value={settingsForm.newPassword}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, newPassword: e.target.value })}
-                    placeholder="Enter New Password (min 6 characters)"
-                    className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
-                  />
-                </div>
+                 <div className="flex flex-col gap-1.5">
+                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">New Password</label>
+                   <div className="relative">
+                     <input
+                       type={showNewPass ? "text" : "password"}
+                       value={settingsForm.newPassword}
+                       onChange={(e) => setSettingsForm({ ...settingsForm, newPassword: e.target.value })}
+                       placeholder="Enter New Password (min 6 characters)"
+                       className="w-full pr-10 px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                     />
+                     <button
+                       type="button"
+                       onClick={() => setShowNewPass(!showNewPass)}
+                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                     >
+                       {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                     </button>
+                   </div>
+                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Confirm New Password</label>
-                  <input
-                    type="password"
-                    value={settingsForm.confirmPassword}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, confirmPassword: e.target.value })}
-                    placeholder="Confirm New Password"
-                    className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
-                  />
-                </div>
+                 <div className="flex flex-col gap-1.5">
+                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Confirm New Password</label>
+                   <div className="relative">
+                     <input
+                       type={showConfirmPass ? "text" : "password"}
+                       value={settingsForm.confirmPassword}
+                       onChange={(e) => setSettingsForm({ ...settingsForm, confirmPassword: e.target.value })}
+                       placeholder="Confirm New Password"
+                       className="w-full pr-10 px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                     />
+                     <button
+                       type="button"
+                       onClick={() => setShowConfirmPass(!showConfirmPass)}
+                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                     >
+                       {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                     </button>
+                   </div>
+                 </div>
 
-                <button
-                  type="submit"
-                  disabled={settingsLoading}
-                  className="w-full py-3 rounded-lg bg-orange-500 text-black font-bold hover:bg-orange-600 transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
-                >
-                  {settingsLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  <span>Save Security Updates</span>
-                </button>
+                 <hr className="border-slate-200 dark:border-white/5 my-2" />
+
+                 <div className="flex flex-col gap-1.5">
+                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Update Security Question</label>
+                   <select
+                     value={settingsForm.securityQuestion}
+                     onChange={(e) => setSettingsForm({ ...settingsForm, securityQuestion: e.target.value })}
+                     className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                   >
+                     {SECURITY_QUESTIONS.map((q, idx) => (
+                       <option key={idx} value={q} className="bg-white dark:bg-[#050914] text-slate-900 dark:text-white">
+                         {q}
+                       </option>
+                     ))}
+                   </select>
+                 </div>
+
+                 <div className="flex flex-col gap-1.5">
+                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Update Security Answer</label>
+                   <input
+                     type="text"
+                     value={settingsForm.securityAnswer}
+                     onChange={(e) => setSettingsForm({ ...settingsForm, securityAnswer: e.target.value })}
+                     placeholder="New recovery answer (optional)"
+                     className="px-3 py-2 bg-slate-50 dark:bg-[#02050E]/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:border-orange-500 transition-all"
+                   />
+                 </div>
+
+                 <button
+                   type="submit"
+                   disabled={settingsLoading}
+                   className="w-full py-3 rounded-lg bg-orange-500 text-black font-bold hover:bg-orange-600 transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+                 >
+                   {settingsLoading && <Loader2 className="w-4.5 h-4.5 animate-spin" />}
+                   <span>Save Security Updates</span>
+                 </button>
               </form>
             </div>
           )}
