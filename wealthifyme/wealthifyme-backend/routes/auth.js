@@ -53,19 +53,17 @@ router.post("/register", async (req, res) => {
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours expiry
 
-    // Create user (verified true in dev for convenience, false in production)
-    const isVerifiedInit = process.env.NODE_ENV !== "production";
+    // Create user (set to verified by default to bypass email dependencies in production/free setups)
     const user = await User.create({ 
       name, 
       email, 
       password,
-      isVerified: isVerifiedInit,
+      isVerified: true,
       verificationToken,
       verificationTokenExpires
     });
 
-
-    // Send verification email
+    // Send welcome email (optional fallback, does not block registration on SMTP failure)
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
     
@@ -73,29 +71,32 @@ router.post("/register", async (req, res) => {
       <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
         <h2 style="color: #0d9488; text-align: center;">Welcome to WealthifyMe!</h2>
         <p>Hi ${name},</p>
-        <p>Thank you for signing up. Please verify your email address to activate your account and start tracking your wealth.</p>
+        <p>Thank you for signing up. Your account has been initialized and is ready to use.</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${verificationLink}" style="background: linear-gradient(135deg, #0d9488 0%, #10b981 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Verify Email Address</a>
+          <a href="${frontendUrl}" style="background: linear-gradient(135deg, #0d9488 0%, #10b981 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
         </div>
-        <p style="font-size: 12px; color: #666;">This link will expire in 24 hours. If the button above doesn't work, copy and paste this link into your browser:</p>
-        <p style="font-size: 12px; color: #0d9488; word-break: break-all;">${verificationLink}</p>
       </div>
     `;
 
     try {
       await sendEmail({
         email: user.email,
-        subject: "Verify your WealthifyMe account",
+        subject: "Welcome to WealthifyMe",
         html
       });
-      res.status(201).json({
-        message: "Registration successful! A verification link has been sent to your email."
-      });
     } catch (mailError) {
-      // If mail fails, delete user so they can try registering again
-      await User.findByIdAndDelete(user._id);
-      return res.status(500).json({ message: "Failed to send verification email. Registration aborted." });
+      console.warn("Dev mode SMTP email sending skipped or failed, continuing registration.");
     }
+
+    res.status(201).json({
+      message: "Registration successful! Welcome to WealthifyMe.",
+      token: generateToken(user._id),
+      user: {
+        _id:   user._id,
+        name:  user.name,
+        email: user.email,
+      }
+    });
 
   } catch (error) {
     console.error("Register error:", error.message);
@@ -122,11 +123,10 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Enforce email verification check (only in production)
-    if (process.env.NODE_ENV === "production" && !user.isVerified) {
+    // Email verification check bypassed to work on zero-cost cloud deployments
+    if (false && !user.isVerified) {
       return res.status(403).json({ message: "Please verify your email before logging in." });
     }
-
 
     res.json({
       token: generateToken(user._id),
