@@ -1,22 +1,22 @@
-# 🌟 Secure MERN Stack Portfolio - Arunabha Nag
+# Secure MERN Stack Portfolio - Arunabha Nag
 
-A high-performance, responsive personal portfolio website built with the **MERN Stack** (MongoDB, Express, React, Node.js) and styled with **Tailwind CSS**. Features a visual landing page, dynamic timeline, selected projects showcase, a client-to-server contact form, and a password-protected **Admin Panel** to manage your site data.
+A high-performance, responsive personal portfolio website built with the MERN Stack (MongoDB, Express, React, Node.js) and styled with Tailwind CSS. Features a visual landing page, dynamic timeline, selected projects showcase, a client-to-server contact form, and a password-protected Admin Panel to manage your site data.
 
 ---
 
-## 🌓 Core Features
+## Core Features
 
 * **Direct Hero Typist Headline**: A visual typewriter animation cycling through professional capabilities.
 * **Persistent Light/Dark Mode**: An aesthetic switch functional on all pages (saved in localStorage).
 * **Skills Marquee**: An infinite scrolling track showing current development tools.
 * **Stacking Roadmap Card Timeline**: Interactive timeline cards representing academic and growth milestones that stack dynamically on scroll.
-* **Marquee Project Spotlight**: Spotlight section showcasing your featured MERN project **WealthifyMe**.
+* **Marquee Project Spotlight**: Spotlight section showcasing your featured MERN project WealthifyMe.
 * **CRUD Admin Panel (`/admin`)**: Secure interface to manage contact form inquiries, timeline cards, and project cards in real-time.
 * **Fully Responsive**: Fluid layout scaling across Mobile, Tablet, and Desktop breakpoints.
 
 ---
 
-## 🛡️ Cyber-Security Protections
+## Cyber-Security Protections
 
 This application is built from the ground up with defensive engineering protocols:
 * **Helmet Headers**: Defends against MIME sniffing, clickjacking, protocol downgrades, and XSS.
@@ -29,7 +29,7 @@ This application is built from the ground up with defensive engineering protocol
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```mermaid
 graph TD
@@ -40,10 +40,10 @@ graph TD
 
 ---
 
-## 🚀 Getting Started Locally
+## Getting Started Locally
 
 ### 1. Prerequisite Setup
-* Ensure **Node.js** (v18+) is installed.
+* Ensure Node.js (v18+) is installed.
 * Get a MongoDB database connection string (local or cloud).
 
 ### 2. Configure Backend
@@ -83,6 +83,6 @@ graph TD
 
 ---
 
-## 🌐 Deploying to Production
+## Deploying to Production
 
-* Detailed hosting steps for **MongoDB Atlas**, **Render**, and **Vercel** are available inside the local [DEPLOYMENT.md](./DEPLOYMENT.md) file.
+* Detailed hosting steps for MongoDB Atlas, Render, and Vercel are available inside the local [DEPLOYMENT.md](./DEPLOYMENT.md) file.
