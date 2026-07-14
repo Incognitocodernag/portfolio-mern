@@ -2,10 +2,23 @@ import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainPortfolio from './components/MainPortfolio';
 
-// Lazy load admin routes to optimize bundle size and page load speed
-const Login = React.lazy(() => import('./admin/Login'));
-const Register = React.lazy(() => import('./admin/Register'));
-const Dashboard = React.lazy(() => import('./admin/Dashboard'));
+// Robust lazy loading wrapper to handle ChunkLoadErrors during active deployments
+const lazyWithRetry = (componentImport) => {
+  return React.lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error) {
+      console.error("Chunk loading error. Forcing full reload:", error);
+      // Reload page to fetch updated javascript chunks
+      window.location.reload();
+      return new Promise(() => {}); // Keep loader active during reload
+    }
+  });
+};
+
+const Login = lazyWithRetry(() => import('./admin/Login'));
+const Register = lazyWithRetry(() => import('./admin/Register'));
+const Dashboard = lazyWithRetry(() => import('./admin/Dashboard'));
 
 // Loading fallback spinner for lazy-loaded route chunks
 const PageLoader = () => (
