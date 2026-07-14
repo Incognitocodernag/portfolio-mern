@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { api } from "../utils/api";
+import { Bot, User, Send, Sparkles, AlertCircle } from "lucide-react";
 
 const SUGGESTIONS = [
   "Summarize my spending trends.",
@@ -12,7 +13,7 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState([
     {
       sender: "ai",
-      text: "### 👋 Welcome to your **WealthifyMe AI Assistant**!\n\nI am here to help you audit your budget, analyze spending behavior, and suggest optimal savings plans.\n\nAsk me anything or select one of the suggestions below to begin.",
+      text: "### Welcome to your **WealthifyMe AI Assistant**!\n\nI am here to help you audit your budget, analyze spending behavior, and suggest optimal savings plans.\n\nAsk me anything or select one of the suggestions below to begin.",
       date: new Date()
     }
   ]);
@@ -46,7 +47,7 @@ const AIAssistant = () => {
         ...prev,
         {
           sender: "ai",
-          text: "⚠️ **Error**: Failed to retrieve AI response. Please make sure the backend server is running and configured correctly.",
+          text: "**Error**: Failed to retrieve AI response. Please make sure the backend server is running and configured correctly.",
           date: new Date()
         }
       ]);
@@ -158,15 +159,15 @@ const AIAssistant = () => {
       {/* Header Banner */}
       <div className="px-6 py-4 bg-slate-50 dark:bg-white/5 border-b border-slate-100 dark:border-dark-border flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 text-xl font-bold">
-            ✨
+          <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-500 dark:text-teal-400">
+            <Bot className="w-5 h-5" />
           </div>
           <div>
             <h2 className="text-base font-bold text-slate-900 dark:text-white">AI Financial Assistant</h2>
             <p className="text-xs text-slate-400">Conversational insights & automated category audits</p>
           </div>
         </div>
-        <div className="px-2.5 py-1 rounded-full bg-teal-500/10 text-[10px] font-semibold text-teal-400 uppercase tracking-wider">
+        <div className="px-2.5 py-1 rounded-full bg-teal-500/10 text-[10px] font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
           Gemini Powered
         </div>
       </div>
@@ -177,10 +178,10 @@ const AIAssistant = () => {
           <div key={idx} className={`flex gap-3 max-w-[85%] ${msg.sender === "user" ? "self-end flex-row-reverse" : "self-start"}`}>
             
             {/* Sender Avatar */}
-            <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-sm ${
-              msg.sender === "user" ? "bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300" : "bg-teal-500 text-white font-bold"
+            <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center ${
+              msg.sender === "user" ? "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300" : "bg-teal-500 text-white"
             }`}>
-              {msg.sender === "user" ? "👤" : "✨"}
+              {msg.sender === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
             </div>
 
             {/* Message Bubble */}
@@ -204,8 +205,8 @@ const AIAssistant = () => {
         {/* Loading Indicator */}
         {loading && (
           <div className="flex gap-3 max-w-[80%] self-start">
-            <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center text-teal-400 text-sm font-bold animate-pulse">
-              ✨
+            <div className="w-8 h-8 rounded-full bg-teal-50 dark:bg-teal-500/10 flex items-center justify-center text-teal-500 dark:text-teal-400 animate-pulse">
+              <Bot className="w-4 h-4 animate-spin-slow" />
             </div>
             <div className="bg-slate-50 dark:bg-[#070b16] border border-slate-100 dark:border-white/5 rounded-2xl rounded-tl-none p-4 flex items-center gap-1">
               <span className="w-2.5 h-2.5 bg-slate-300 dark:bg-slate-600 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
@@ -249,9 +250,9 @@ const AIAssistant = () => {
         <button
           type="submit"
           disabled={loading || !input.trim()}
-          className="px-5 py-3 rounded-xl bg-teal-500 text-white font-bold hover:bg-teal-600 active:bg-teal-700 transition-colors disabled:opacity-50 text-sm shadow-md shadow-teal-500/25"
+          className="px-5 py-3 rounded-xl bg-teal-500 text-white font-bold hover:bg-teal-600 active:bg-teal-700 transition-colors disabled:opacity-50 text-sm shadow-md shadow-teal-500/25 flex items-center gap-1.5"
         >
-          Send
+          <Send className="w-4 h-4" /> Send
         </button>
       </form>
 
